@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>An welche Zahl denke ich? - Spiel mit Rangliste</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        input, button {
+            font-size: 1em;
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+        }
+        input {
+            background-color: #333;
+            color: #fff;
+        }
+        button {
+            background-color: #ff0000;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #cc0000;
+        }
+        #feedback {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        #game, #ranking {
+            display: none;
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 80%;
+        }
+        th, td {
+            border: 1px solid #555;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #222;
+        }
+        td {
+            background-color: #111;
+        }
+    </style>
+</head>
+<body>
+    <h1>An welche Zahl denke ich?</h1>
+    <div id="start">
+        <p>Gib deinen Namen ein, um das Spiel zu starten:</p>
+        <input type="text" id="playerName" placeholder="Dein Name">
+        <button onclick="startGame()">Spiel Starten</button>
+    </div>
+    <div id="game">
+        <p>Rate eine Zahl zwischen 1 und 100:</p>
+        <input type="number" id="guess" min="1" max="100">
+        <button onclick="checkGuess()">Tipp Abgeben</button>
+        <p id="feedback"></p>
+    </div>
+    <div id="ranking">
+        <h2>Rangliste</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rang</th>
+                    <th>Name</th>
+                    <th>Versuche</th>
+                </tr>
+            </thead>
+            <tbody id="rankingBoard">
+                <!-- Die Ranglisteneinträge werden hier hartkodiert -->
+                <tr>
+                    <td>1</td>
+                    <td>Max</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Anna</td>
+                    <td>5</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let playerName;
+        const randomNumber = Math.floor(Math.random() * 100) + 1;
+        let attempts = 0;
+        const ranking = [
+            { name: "Max", attempts: 3 },
+            { name: "Anna", attempts: 5 }
+        ];
+
+        function startGame() {
+            playerName = document.getElementById('playerName').value;
+            if (playerName.trim() === '') {
+                alert('Bitte gib deinen Namen ein.');
+                return;
+            }
+            document.getElementById('start').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            document.getElementById('ranking').style.display = 'block';
+            displayRanking();
+        }
+
+        function checkGuess() {
+            const userGuess = Number(document.getElementById('guess').value);
+            attempts++;
+            let feedback = '';
+
+            if (userGuess < 1 || userGuess > 100) {
+                feedback = 'Bitte gib eine Zahl zwischen 1 und 100 ein.';
+            } else if (userGuess < randomNumber) {
+                feedback = 'Zu niedrig! Versuche es noch einmal.';
+            } else if (userGuess > randomNumber) {
+                feedback = 'Zu hoch! Versuche es noch einmal.';
+            } else {
+                feedback = `Herzlichen Glückwunsch, ${playerName}! Du hast die Zahl in ${attempts} Versuchen erraten.`;
+                updateRanking(playerName, attempts);
+            }
+
+            document.getElementById('feedback').textContent = feedback;
+        }
+
+        function updateRanking(name, attempts) {
+            ranking.push({ name, attempts });
+            ranking.sort((a, b) => a.attempts - b.attempts);
+            displayRanking();
+        }
+
+        function displayRanking() {
+            const rankingBoard = document.getElementById('rankingBoard');
+            rankingBoard.innerHTML = '';
+            ranking.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${index + 1}</td><td>${entry.name}</td><td>${entry.attempts}</td>`;
+                rankingBoard.appendChild(row);
+            });
+        }
+
+        // Initiale Rangliste anzeigen
+        displayRanking();
+    </script>
+</body>
+</html>
