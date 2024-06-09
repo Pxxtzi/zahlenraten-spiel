@@ -149,8 +149,8 @@
             attempts = 0;
             document.getElementById('attempts').textContent = attempts;
             document.getElementById('progressBar').style.width = '0%';
-            document.getElementById('start').classList.add('hidden');
-            document.getElementById('game').classList.remove('hidden');
+            document.getElementById('start').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
             displayRanking();
         }
 
@@ -170,8 +170,8 @@
             } else {
                 feedback = `Herzlichen Glückwunsch, ${playerName}! Du hast die Zahl in ${attempts} Versuchen erraten.`;
                 updateRanking(playerName, attempts);
-                document.getElementById('game').classList.add('hidden');
-                document.getElementById('ranking').classList.remove('hidden');
+                document.getElementById('game').style.display = 'none';
+                document.getElementById('ranking').style.display = 'block';
             }
 
             document.getElementById('feedback').textContent = feedback;
@@ -203,8 +203,8 @@
         }
 
         function resetGame() {
-            document.getElementById('game').classList.add('hidden');
-            document.getElementById('start').classList.remove('hidden');
+            document.getElementById('game').style.display = 'none';
+            document.getElementById('start').style.display = 'block';
             document.getElementById('feedback').textContent = '';
             document.getElementById('guess').value = '';
         }
@@ -214,18 +214,6 @@
                 localStorage.removeItem('ranking');
                 ranking.length = 0;
                 displayRanking();
-            }
-        }
-
-        function playSound(type) {
-            let sound;
-            if (type === 'win') {
-                sound = new Audio('https://www.soundjay.com/button/beep-07.wav');
-            } else if (type === 'click') {
-                sound = new Audio('https://www.soundjay.com/button/beep-08b.wav');
-            }
-            if (sound) {
-                sound.play();
             }
         }
 
