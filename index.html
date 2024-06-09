@@ -49,7 +49,7 @@
             margin-top: 20px;
             font-size: 1.2em;
         }
-        #game, #ranking {
+        #ranking {
             display: none;
         }
         table {
@@ -74,12 +74,6 @@
         }
         #rankingBoard tr:hover td {
             background-color: #333;
-        }
-        .hidden {
-            display: none;
-        }
-        .visible {
-            display: block;
         }
         #progress {
             width: 80%;
@@ -115,7 +109,7 @@
         </div>
         <button onclick="resetGame()">Neustart</button>
     </div>
-    <div id="ranking" class="hidden">
+    <div id="ranking">
         <h2>Rangliste</h2>
         <table>
             <thead>
@@ -151,19 +145,23 @@
             document.getElementById('progressBar').style.width = '0%';
             document.getElementById('start').classList.add('hidden');
             document.getElementById('game').classList.remove('hidden');
+            document.getElementById('ranking').style.display = 'block';
             displayRanking();
         }
 
         function checkGuess() {
             const userGuess = Number(document.getElementById('guess').value);
+            if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
+                document.getElementById('feedback').textContent = 'Bitte gib eine Zahl zwischen 1 und 100 ein.';
+                return;
+            }
+
             attempts++;
             document.getElementById('attempts').textContent = attempts;
             document.getElementById('progressBar').style.width = (attempts * 2) + '%';
             let feedback = '';
 
-            if (userGuess < 1 || userGuess > 100) {
-                feedback = 'Bitte gib eine Zahl zwischen 1 und 100 ein.';
-            } else if (userGuess < randomNumber) {
+            if (userGuess < randomNumber) {
                 feedback = 'Zu niedrig! Versuche es noch einmal.';
             } else if (userGuess > randomNumber) {
                 feedback = 'Zu hoch! Versuche es noch einmal.';
@@ -171,7 +169,7 @@
                 feedback = `Herzlichen Glückwunsch, ${playerName}! Du hast die Zahl in ${attempts} Versuchen erraten.`;
                 updateRanking(playerName, attempts);
                 document.getElementById('game').classList.add('hidden');
-                document.getElementById('ranking').classList.remove('hidden');
+                document.getElementById('start').classList.remove('hidden');
             }
 
             document.getElementById('feedback').textContent = feedback;
