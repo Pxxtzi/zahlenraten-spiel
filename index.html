@@ -13,7 +13,7 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             background-color: #000;
             color: #fff;
@@ -49,8 +49,12 @@
             margin-top: 20px;
             font-size: 1.2em;
         }
-        #ranking {
+        .hidden {
             display: none;
+        }
+        #start, #game {
+            width: 100%;
+            max-width: 300px;
         }
         table {
             margin: 20px auto;
@@ -76,7 +80,7 @@
             background-color: #333;
         }
         #progress {
-            width: 80%;
+            width: 100%;
             max-width: 300px;
             height: 20px;
             background-color: #ccc;
@@ -145,7 +149,6 @@
             document.getElementById('progressBar').style.width = '0%';
             document.getElementById('start').classList.add('hidden');
             document.getElementById('game').classList.remove('hidden');
-            document.getElementById('ranking').style.display = 'block';
             displayRanking();
         }
 
@@ -170,6 +173,7 @@
                 updateRanking(playerName, attempts);
                 document.getElementById('game').classList.add('hidden');
                 document.getElementById('start').classList.remove('hidden');
+                resetGame();
             }
 
             document.getElementById('feedback').textContent = feedback;
@@ -205,6 +209,10 @@
             document.getElementById('start').classList.remove('hidden');
             document.getElementById('feedback').textContent = '';
             document.getElementById('guess').value = '';
+            randomNumber = Math.floor(Math.random() * 100) + 1;
+            attempts = 0;
+            document.getElementById('attempts').textContent = attempts;
+            document.getElementById('progressBar').style.width = '0%';
         }
 
         function clearRanking() {
