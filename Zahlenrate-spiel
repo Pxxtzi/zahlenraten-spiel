@@ -8,22 +8,29 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background-color: #000;
-            color: #fff;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            background-color: #000;
+            color: #fff;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
         }
         input, button {
-            font-size: 1em;
+            font-size: 1.2em;
             padding: 10px;
             margin: 5px;
             border: none;
             border-radius: 5px;
+            width: 80%;
+            max-width: 300px;
         }
         input {
             background-color: #333;
@@ -33,6 +40,7 @@
             background-color: #ff0000;
             color: #fff;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         button:hover {
             background-color: #cc0000;
@@ -47,7 +55,8 @@
         table {
             margin: 20px auto;
             border-collapse: collapse;
-            width: 80%;
+            width: 90%;
+            max-width: 600px;
         }
         th, td {
             border: 1px solid #555;
@@ -60,6 +69,32 @@
         td {
             background-color: #111;
         }
+        #rankingBoard td {
+            transition: background-color 0.3s ease;
+        }
+        #rankingBoard tr:hover td {
+            background-color: #333;
+        }
+        .hidden {
+            display: none;
+        }
+        .visible {
+            display: block;
+        }
+        #progress {
+            width: 80%;
+            max-width: 300px;
+            height: 20px;
+            background-color: #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        #progress div {
+            height: 100%;
+            background-color: #ff0000;
+            transition: width 0.3s;
+        }
     </style>
 </head>
 <body>
@@ -69,13 +104,18 @@
         <input type="text" id="playerName" placeholder="Dein Name">
         <button onclick="startGame()">Spiel Starten</button>
     </div>
-    <div id="game">
+    <div id="game" class="hidden">
         <p>Rate eine Zahl zwischen 1 und 100:</p>
         <input type="number" id="guess" min="1" max="100">
         <button onclick="checkGuess()">Tipp Abgeben</button>
         <p id="feedback"></p>
+        <p>Versuche: <span id="attempts">0</span></p>
+        <div id="progress">
+            <div id="progressBar"></div>
+        </div>
+        <button onclick="resetGame()">Neustart</button>
     </div>
-    <div id="ranking">
+    <div id="ranking" class="hidden">
         <h2>Rangliste</h2>
         <table>
             <thead>
@@ -86,29 +126,18 @@
                 </tr>
             </thead>
             <tbody id="rankingBoard">
-                <!-- Die Ranglisteneinträge werden hier hartkodiert -->
-                <tr>
-                    <td>1</td>
-                    <td>Max</td>
-                    <td>3</td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Anna</td>
-                    <td>5</td>
-                </tr>
+                <!-- Die Ranglisteneinträge werden hier dynamisch eingefügt -->
             </tbody>
         </table>
+        <button onclick="clearRanking()">Rangliste Zurücksetzen</button>
+        <p id="stats"></p>
     </div>
 
     <script>
         let playerName;
-        const randomNumber = Math.floor(Math.random() * 100) + 1;
+        let randomNumber;
         let attempts = 0;
-        const ranking = [
-            { name: "Max", attempts: 3 },
-            { name: "Anna", attempts: 5 }
-        ];
+        const ranking = JSON.parse(localStorage.getItem('ranking')) || [];
 
         function startGame() {
             playerName = document.getElementById('playerName').value;
@@ -116,15 +145,21 @@
                 alert('Bitte gib deinen Namen ein.');
                 return;
             }
-            document.getElementById('start').style.display = 'none';
-            document.getElementById('game').style.display = 'block';
-            document.getElementById('ranking').style.display = 'block';
+            randomNumber = Math.floor(Math.random() * 100) + 1;
+            attempts = 0;
+            document.getElementById('attempts').textContent = attempts;
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('start').classList.add('hidden');
+            document.getElementById('game').classList.remove('hidden');
+            document.getElementById('ranking').classList.remove('hidden');
             displayRanking();
         }
 
         function checkGuess() {
             const userGuess = Number(document.getElementById('guess').value);
             attempts++;
+            document.getElementById('attempts').textContent = attempts;
+            document.getElementById('progressBar').style.width = (attempts * 2) + '%';
             let feedback = '';
 
             if (userGuess < 1 || userGuess > 100) {
@@ -136,6 +171,7 @@
             } else {
                 feedback = `Herzlichen Glückwunsch, ${playerName}! Du hast die Zahl in ${attempts} Versuchen erraten.`;
                 updateRanking(playerName, attempts);
+                document.getElementById('game').classList.add('hidden');
             }
 
             document.getElementById('feedback').textContent = feedback;
@@ -144,7 +180,9 @@
         function updateRanking(name, attempts) {
             ranking.push({ name, attempts });
             ranking.sort((a, b) => a.attempts - b.attempts);
+            localStorage.setItem('ranking', JSON.stringify(ranking));
             displayRanking();
+            playSound('win');
         }
 
         function displayRanking() {
@@ -155,6 +193,41 @@
                 row.innerHTML = `<td>${index + 1}</td><td>${entry.name}</td><td>${entry.attempts}</td>`;
                 rankingBoard.appendChild(row);
             });
+            updateStats();
+        }
+
+        function updateStats() {
+            const totalGames = ranking.length;
+            const totalAttempts = ranking.reduce((sum, entry) => sum + entry.attempts, 0);
+            const averageAttempts = totalGames ? (totalAttempts / totalGames).toFixed(2) : 0;
+            document.getElementById('stats').textContent = `Gesamtspiele: ${totalGames}, Durchschnittliche Versuche: ${averageAttempts}`;
+        }
+
+        function resetGame() {
+            document.getElementById('game').classList.add('hidden');
+            document.getElementById('start').classList.remove('hidden');
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('guess').value = '';
+        }
+
+        function clearRanking() {
+            if (confirm('Sind Sie sicher, dass Sie die Rangliste zurücksetzen möchten?')) {
+                localStorage.removeItem('ranking');
+                ranking.length = 0;
+                displayRanking();
+            }
+        }
+
+        function playSound(type) {
+            let sound;
+            if (type === 'win') {
+                sound = new Audio('https://www.soundjay.com/button/beep-07.wav');
+            } else if (type === 'click') {
+                sound = new Audio('https://www.soundjay.com/button/beep-08b.wav');
+            }
+            if (sound) {
+                sound.play();
+            }
         }
 
         // Initiale Rangliste anzeigen
