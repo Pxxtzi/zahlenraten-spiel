@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -152,7 +151,6 @@
             document.getElementById('progressBar').style.width = '0%';
             document.getElementById('start').classList.add('hidden');
             document.getElementById('game').classList.remove('hidden');
-            document.getElementById('ranking').classList.remove('hidden');
             displayRanking();
         }
 
@@ -173,6 +171,7 @@
                 feedback = `Herzlichen Glückwunsch, ${playerName}! Du hast die Zahl in ${attempts} Versuchen erraten.`;
                 updateRanking(playerName, attempts);
                 document.getElementById('game').classList.add('hidden');
+                document.getElementById('ranking').classList.remove('hidden');
             }
 
             document.getElementById('feedback').textContent = feedback;
@@ -183,7 +182,6 @@
             ranking.sort((a, b) => a.attempts - b.attempts);
             localStorage.setItem('ranking', JSON.stringify(ranking));
             displayRanking();
-            playSound('win');
         }
 
         function displayRanking() {
